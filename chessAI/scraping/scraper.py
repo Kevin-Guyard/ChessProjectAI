@@ -13,18 +13,37 @@ class Scraper():
         
         """Constructor method"""
         
-        self._df_thread_1 = pd.DataFrame()
-        self._df_thread_2 = pd.DataFrame()
-        self._df_thread_3 = pd.DataFrame()
-        self._df_thread_4 = pd.DataFrame()
-        self._df_thread_5 = pd.DataFrame()
-        self._df_thread_6 = pd.DataFrame()
-        self._df_thread_7 = pd.DataFrame()
-        self._df_thread_8 = pd.DataFrame()
+        self._list_df_thread_1 = []
+        self._list_df_thread_2 = []
+        self._list_df_thread_3 = []
+        self._list_df_thread_4 = []
+        self._list_df_thread_5 = []
+        self._list_df_thread_6 = []
+        self._list_df_thread_7 = []
+        self._list_df_thread_8 = []
         self._list_players = []
         self._nb_player_done = 0
         self._lock_list_player = threading.Lock()
         self._lock_nb_player_done = threading.Lock()
+        
+        
+    def get_a_player(self):
+        
+        """Return a player to scrap
+        
+        :return actual_player: name of the player to scrap
+        :rtype actual_player: string
+        """
+        
+        # Use lock for thread safety
+        with self._lock_list_player:
+            # If there is at least another player to scrap in self._list_players, pop it, else None
+            if len(self._list_players) > 0: 
+                actual_player = self._list_players.pop(0)
+            else:
+                actual_player = None
+                
+        return actual_player
         
         
     def thread_get_games_all_time_all_players(self, elo_min, n_thread, nb_player):
@@ -42,35 +61,29 @@ class Scraper():
         :type nb_player: integer
         """
         
-        with self._lock_list_player:
-            if len(self._list_players) > 0: 
-                actual_player = self._list_players.pop(0)
-            else:
-                actual_player = None
+        # Get a player
+        actual_player = self.get_a_player()
         
         while actual_player != None:
             
             df_player = get_games_all_time_one_player(actual_player, elo_min)
             
             if df_player.shape[0] > 0:
-                if n_thread == 1: self._df_thread_1 = pd.concat([self._df_thread_1, df_player])
-                elif n_thread == 2: self._df_thread_2 = pd.concat([self._df_thread_2, df_player])
-                elif n_thread == 3: self._df_thread_3 = pd.concat([self._df_thread_3, df_player])
-                elif n_thread == 4: self._df_thread_4 = pd.concat([self._df_thread_4, df_player])
-                elif n_thread == 5: self._df_thread_5 = pd.concat([self._df_thread_5, df_player])
-                elif n_thread == 6: self._df_thread_6 = pd.concat([self._df_thread_6, df_player])
-                elif n_thread == 7: self._df_thread_7 = pd.concat([self._df_thread_7, df_player])
-                elif n_thread == 8: self._df_thread_8 = pd.concat([self._df_thread_8, df_player])
+                if n_thread == 1: self._df_thread_1 = self._list_df_thread_1.append(df_player)
+                elif n_thread == 2: self._df_thread_2 = self._list_df_thread_2.append(df_player)
+                elif n_thread == 3: self._df_thread_3 = self._list_df_thread_3.append(df_player)
+                elif n_thread == 4: self._df_thread_4 = self._list_df_thread_4.append(df_player)
+                elif n_thread == 5: self._df_thread_5 = self._list_df_thread_5.append(df_player)
+                elif n_thread == 6: self._df_thread_6 = self._list_df_thread_6.append(df_player)
+                elif n_thread == 7: self._df_thread_7 = self._list_df_thread_7.append(df_player)
+                elif n_thread == 8: self._df_thread_8 = self._list_df_thread_8.append(df_player)
                                     
             with self._lock_nb_player_done:
                 self._nb_player_done += 1
                 print('Scraping: ' + str(self._nb_player_done) + '/' + str(nb_player) + ' players done', end='\r')
-                
-            with self._lock_list_player:
-                if len(self._list_players) > 0:
-                    actual_player = self._list_players.pop(0)
-                else:
-                    actual_player = None
+            
+            # Get next player
+            actual_player = self.get_a_player()
         
         
     def get_games_all_time_all_players(self, list_titles=['GM'], elo_min=2000):
@@ -92,16 +105,14 @@ class Scraper():
             self._list_players += get_list_players(title)
             
         nb_player = len(self._list_players)
-            
         threads = []
         
         # Count the number of cpu for threading (max 8 thread)
-        nb_cpu = multiprocessing.cpu_count()
-        if nb_cpu > 8: nb_cpu = 8
+        nb_core = multiprocessing.cpu_count()
+        if nb_core > 8: nb_core = 8
         
         # Create and start thread to do the task
-        for n_thread in range(1, nb_cpu+1):
-            
+        for n_thread in range(1, nb_core+1):
             threads.append(threading.Thread(target=self.thread_get_games_all_time_all_players, args=(elo_min, n_thread, nb_player, )))
             threads[n_thread-1].start()
             
@@ -109,16 +120,16 @@ class Scraper():
             thread.join()
             
         # Concat data from each thread
-        df_global = pd.concat([
-            self._df_thread_1, 
-            self._df_thread_2,
-            self._df_thread_3,
-            self._df_thread_4,
-            self._df_thread_5,
-            self._df_thread_6,
-            self._df_thread_7,
-            self._df_thread_8
-        ])
+        df_global = pd.concat([df for df in \
+                               self._list_df_thread_1 + \
+                               self._list_df_thread_2 + \
+                               self._list_df_thread_3 + \
+                               self._list_df_thread_4 + \
+                               self._list_df_thread_5 + \
+                               self._list_df_thread_6 + \
+                               self._list_df_thread_7 + \
+                               self._list_df_thread_8
+                              ])
                 
         # Drop duplicated rows on link field, drop link and reset index
         df_global.drop_duplicates(inplace=True, subset=['link'])
