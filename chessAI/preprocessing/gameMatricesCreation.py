@@ -126,23 +126,23 @@ def create_game_matrices_one_chunk_games(df_chunk):
     :return matrices_white_1: matrix of game matrices (1 matrix for one position in the game) for white move using first method
     :rtype matrices_white_1: np.array of shape (x, 8, 8, 12) (where x is the number of white position of the game), dtype=bool
     
-    :return matrices_white_2: matrix of game matrices (1 matrix for one position in the game) for white move using second method
-    :rtype matrices_white_2: np.array of shape (x, 8, 8, 6) (where x is the number of white position of the game), dtype=int
-    
-    :return matrices_white_3: matrix of game matrices (1 matrix for one position in the game) for white move using third method
-    :rtype matrices_white_3: np.array of shape (x, 8, 8, 4) (where x is the number of white position of the game), dtype=float
-    
-    :return matrices_white_4: matrix of game matrices (1 matrix for one position in the game) for white move using fourth method
-    :rtype matrices_white_4: np.array of shape (x, 8, 8, 2) (where x is the number of white position of the game), dtype=float
-    
     :return matrices_black_1: matrix of game matrices (1 matrix for one position in the game) for black move using first method
     :rtype matrices_black_1: np.array of shape (x, 8, 8, 12) (where x is the number of black position of the game), dtype=bool
+    
+    :return matrices_white_2: matrix of game matrices (1 matrix for one position in the game) for white move using second method
+    :rtype matrices_white_2: np.array of shape (x, 8, 8, 6) (where x is the number of white position of the game), dtype=int
     
     :return matrices_black_2: matrix of game matrices (1 matrix for one position in the game) for black move using second method
     :rtype matrices_black_2: np.array of shape (x, 8, 8, 6) (where x is the number of black position of the game), dtype=int
     
+    :return matrices_white_3: matrix of game matrices (1 matrix for one position in the game) for white move using third method
+    :rtype matrices_white_3: np.array of shape (x, 8, 8, 4) (where x is the number of white position of the game), dtype=float
+    
     :return matrices_black_3: matrix of game matrices (1 matrix for one position in the game) for black move using third method
     :rtype matrices_black_3: np.array of shape (x, 8, 8, 4) (where x is the number of black position of the game), dtype=float
+    
+    :return matrices_white_4: matrix of game matrices (1 matrix for one position in the game) for white move using fourth method
+    :rtype matrices_white_4: np.array of shape (x, 8, 8, 2) (where x is the number of white position of the game), dtype=float
     
     :return matrices_black_4: matrix of game matrices (1 matrix for one position in the game) for black move using fourth method
     :rtype matrices_black_4: np.array of shape (x, 8, 8, 2) (where x is the number of black position of the game), dtype=float
