@@ -114,3 +114,75 @@ def create_game_matrices_one_game(pgn_text, is_white_win):
     y_black = np.full(matrices_black_1.shape[0], not is_white_win, dtype=bool)
         
     return matrices_white_1, matrices_black_1, matrices_white_2, matrices_black_2, matrices_white_3, matrices_black_3, matrices_white_4, matrices_black_4, y_white, y_black
+
+
+def create_game_matrices_one_chunk_games(df_chunk):
+    
+    """Return matrices of game position of all position (except first and last) of the games in df_chunk with the 4 methods.
+    
+    :param df_chunk: df with the game (1 column is_white_win and 1 column pgn_text)
+    :type df_chunk: pd.DataFrame()
+    
+    :return matrices_white_1: matrix of game matrices (1 matrix for one position in the game) for white move using first method
+    :rtype matrices_white_1: np.array of shape (x, 8, 8, 12) (where x is the number of white position of the game), dtype=bool
+    
+    :return matrices_white_2: matrix of game matrices (1 matrix for one position in the game) for white move using second method
+    :rtype matrices_white_2: np.array of shape (x, 8, 8, 6) (where x is the number of white position of the game), dtype=int
+    
+    :return matrices_white_3: matrix of game matrices (1 matrix for one position in the game) for white move using third method
+    :rtype matrices_white_3: np.array of shape (x, 8, 8, 4) (where x is the number of white position of the game), dtype=float
+    
+    :return matrices_white_4: matrix of game matrices (1 matrix for one position in the game) for white move using fourth method
+    :rtype matrices_white_4: np.array of shape (x, 8, 8, 2) (where x is the number of white position of the game), dtype=float
+    
+    :return matrices_black_1: matrix of game matrices (1 matrix for one position in the game) for black move using first method
+    :rtype matrices_black_1: np.array of shape (x, 8, 8, 12) (where x is the number of black position of the game), dtype=bool
+    
+    :return matrices_black_2: matrix of game matrices (1 matrix for one position in the game) for black move using second method
+    :rtype matrices_black_2: np.array of shape (x, 8, 8, 6) (where x is the number of black position of the game), dtype=int
+    
+    :return matrices_black_3: matrix of game matrices (1 matrix for one position in the game) for black move using third method
+    :rtype matrices_black_3: np.array of shape (x, 8, 8, 4) (where x is the number of black position of the game), dtype=float
+    
+    :return matrices_black_4: matrix of game matrices (1 matrix for one position in the game) for black move using fourth method
+    :rtype matrices_black_4: np.array of shape (x, 8, 8, 2) (where x is the number of black position of the game), dtype=float
+    
+    :return y_white: array with full of True or False depending of is_white_win
+    :rtype y_white: np.array of shape (x) dtype=bool
+    
+    :return y_black: array with full of True or False depending of is_white_win
+    :rtype y_black: np.array of shape (x) dtype=bool
+    """
+        
+    list_matrices_white_1, list_matrices_white_2, list_matrices_white_3, list_matrices_white_4 = [], [], [], []
+    list_matrices_black_1, list_matrices_black_2, list_matrices_black_3, list_matrices_black_4 = [], [], [], []
+    list_y_white, list_y_black = [], []
+        
+    # Iterate over games and add matrices to the corresponding list
+    for index, row in df_chunk.iterrows():
+            
+        features = create_game_matrices_one_game(row.pgn_text, row.is_white_win)
+        list_matrices_white_1.append(features[0])
+        list_matrices_black_1.append(features[1])
+        list_matrices_white_2.append(features[2])
+        list_matrices_black_2.append(features[3])
+        list_matrices_white_3.append(features[4])
+        list_matrices_black_3.append(features[5])
+        list_matrices_white_4.append(features[6])
+        list_matrices_black_4.append(features[7])
+        list_y_white.append(features[8])
+        list_y_black.append(features[9])
+            
+    # Concat the list
+    matrices_white_1 = np.concatenate(list_matrices_white_1)
+    matrices_white_2 = np.concatenate(list_matrices_white_2)
+    matrices_white_3 = np.concatenate(list_matrices_white_3)
+    matrices_white_4 = np.concatenate(list_matrices_white_4)
+    matrices_black_1 = np.concatenate(list_matrices_black_1)
+    matrices_black_2 = np.concatenate(list_matrices_black_2)
+    matrices_black_3 = np.concatenate(list_matrices_black_3)
+    matrices_black_4 = np.concatenate(list_matrices_black_4)
+    y_white = np.concatenate(list_y_white)
+    y_black = np.concatenate(list_y_black)
+        
+    return matrices_white_1, matrices_white_2, matrices_white_3, matrices_white_4, matrices_black_1, matrices_black_2, matrices_black_3, matrices_black_4, y_white, y_black
