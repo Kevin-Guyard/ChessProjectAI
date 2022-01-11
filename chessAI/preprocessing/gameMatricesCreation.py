@@ -59,7 +59,7 @@ def create_game_matrices_one_method_one_game(list_board_rep, n_method):
     return matrices_white, matrices_black
 
 
-def create_features_one_game(pgn_text, is_white_win):
+def create_game_matrices_one_game(pgn_text, is_white_win):
     
     """Return matrices of game position of all position of the game (except first and last) with the 4 methods
     
@@ -69,11 +69,29 @@ def create_features_one_game(pgn_text, is_white_win):
     :param is_white_win: True if the game is win by the white player else False
     :type is_white_win: boolean
     
-    :return list_matrices_white: list of the matrix of game matrices (1 matrix for one position in the game) for white move (1 item in the list by method)
-    :rtype list_matrices_white: list of np.array (length 4), np.array of shape (x, 8, 8, y) (where x is the number of white position of the game, y the last dim shape depending of the method), dtype=(bool for first method, int for second and float for thrid and fourth)
+    :return matrices_white_1: matrix of game matrices (1 matrix for one position in the game) for white move using first method
+    :rtype matrices_white_1: np.array of shape (x, 8, 8, 12) (where x is the number of white position of the game), dtype=bool
     
-    :return list_matrices_black: list of the matrix of game matrices (1 matrix for one position in the game) for black move (1 item in the list by method)
-    :rtype list_matrices_black: list of np.array (length 4), np.array of shape (x, 8, 8, y) (where x is the number of black position of the game, y the last dim shape depending of the method), dtype=(bool for first method, int for second and float for thrid and fourth)
+    :return matrices_black_1: matrix of game matrices (1 matrix for one position in the game) for black move using first method
+    :rtype matrices_black_1: np.array of shape (x, 8, 8, 12) (where x is the number of black position of the game), dtype=bool
+    
+    :return matrices_white_2: matrix of game matrices (1 matrix for one position in the game) for white move using second method
+    :rtype matrices_white_2: np.array of shape (x, 8, 8, 6) (where x is the number of white position of the game), dtype=int
+    
+    :return matrices_black_2: matrix of game matrices (1 matrix for one position in the game) for black move using second method
+    :rtype matrices_black_2: np.array of shape (x, 8, 8, 6) (where x is the number of black position of the game), dtype=int
+    
+    :return matrices_white_3: matrix of game matrices (1 matrix for one position in the game) for white move using third method
+    :rtype matrices_white_3: np.array of shape (x, 8, 8, 4) (where x is the number of white position of the game), dtype=float
+    
+    :return matrices_black_3: matrix of game matrices (1 matrix for one position in the game) for black move using third method
+    :rtype matrices_black_3: np.array of shape (x, 8, 8, 4) (where x is the number of black position of the game), dtype=float
+    
+    :return matrices_white_4: matrix of game matrices (1 matrix for one position in the game) for white move using fourth method
+    :rtype matrices_white_4: np.array of shape (x, 8, 8, 2) (where x is the number of white position of the game), dtype=float
+    
+    :return matrices_black_4: matrix of game matrices (1 matrix for one position in the game) for black move using fourth method
+    :rtype matrices_black_4: np.array of shape (x, 8, 8, 2) (where x is the number of black position of the game), dtype=float
     
     :return y_white: array with full of True or False depending of is_white_win
     :rtype y_white: np.array of shape (x) dtype=bool
@@ -82,23 +100,17 @@ def create_features_one_game(pgn_text, is_white_win):
     :rtype y_black: np.array of shape (x) dtype=bool
     """
     
-    list_matrices_white = []
-    list_matrices_black = []
-    
     # Get a list of board representation for each position in the game (except first and last)
     list_board_rep = parse_pgn_to_list_board_rep(pgn_text)
     
-    for n_method in range(1, 5):
-        matrices_white, matrices_black = create_game_matrices_one_method_one_game(list_board_rep, n_method)
-        list_matrices_white.append(matrices_white)
-        list_matrices_black.append(matrices_black)
-        
-    # Get white and black nb
-    nb_move_white = list_matrices_white[0].shape[0]
-    nb_move_black = list_matrices_black[0].shape[0]
+    # Get matrices
+    matrices_white_1, matrices_black_1 = create_game_matrices_one_method_one_game(list_board_rep, 1)
+    matrices_white_2, matrices_black_2 = create_game_matrices_one_method_one_game(list_board_rep, 2)
+    matrices_white_3, matrices_black_3 = create_game_matrices_one_method_one_game(list_board_rep, 3)
+    matrices_white_4, matrices_black_4 = create_game_matrices_one_method_one_game(list_board_rep, 4)
     
     # Create y matrix (is_white_win)
-    y_white = np.full(nb_move_white, is_white_win, dtype=bool)
-    y_black = np.full(nb_move_black, not is_white_win, dtype=bool)
+    y_white = np.full(matrices_white_1.shape[0], is_white_win, dtype=bool)
+    y_black = np.full(matrices_black_1.shape[0], not is_white_win, dtype=bool)
         
-    return list_matrices_white, list_matrices_black, y_white, y_black
+    return matrices_white_1, matrices_black_1, matrices_white_2, matrices_black_2, matrices_white_3, matrices_black_3, matrices_white_4, matrices_black_4, y_white, y_black
