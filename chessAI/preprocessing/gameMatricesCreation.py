@@ -161,17 +161,20 @@ def create_game_matrices_one_chunk_games(df_chunk):
     # Iterate over games and add matrices to the corresponding list
     for index, row in df_chunk.iterrows():
             
-        features = create_game_matrices_one_game(row.pgn_text, row.is_white_win)
-        list_matrices_white_1.append(features[0])
-        list_matrices_black_1.append(features[1])
-        list_matrices_white_2.append(features[2])
-        list_matrices_black_2.append(features[3])
-        list_matrices_white_3.append(features[4])
-        list_matrices_black_3.append(features[5])
-        list_matrices_white_4.append(features[6])
-        list_matrices_black_4.append(features[7])
-        list_y_white.append(features[8])
-        list_y_black.append(features[9])
+        matrices_white_1_game, matrices_black_1_game, matrices_white_2_game, matrices_black_2_game, \
+        matrices_white_3_game, matrices_black_3_game, matrices_white_4_game, matrices_black_4_game, \
+        y_white_game, y_black_game = create_game_matrices_one_game(row.pgn_text, row.is_white_win)
+        
+        list_matrices_white_1.append(matrices_white_1_game)
+        list_matrices_black_1.append(matrices_black_1_game)
+        list_matrices_white_2.append(matrices_white_2_game)
+        list_matrices_black_2.append(matrices_black_2_game)
+        list_matrices_white_3.append(matrices_white_3_game)
+        list_matrices_black_3.append(matrices_black_3_game)
+        list_matrices_white_4.append(matrices_white_4_game)
+        list_matrices_black_4.append(matrices_black_4_game)
+        list_y_white.append(y_white_game)
+        list_y_black.append(y_black_game)
             
     # Concat the list
     matrices_white_1 = np.concatenate(list_matrices_white_1)
