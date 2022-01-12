@@ -1,7 +1,6 @@
 import pandas as pd
 import threading
 import multiprocessing
-import time
 from chessAI.scraping.playersData import get_list_players
 from chessAI.scraping.gamesData import get_games_all_time_one_player
 
