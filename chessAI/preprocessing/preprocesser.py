@@ -3,6 +3,7 @@ import numpy as np
 import threading
 import multiprocessing
 import os
+from sklearn.model_selection import train_test_split
 from chessAI.preprocessing.gameMatricesCreation import create_game_matrices_one_chunk_games
 
 """This module provides the Preprocesser class"""
@@ -117,18 +118,15 @@ class Preprocesser():
             df_chunk = self.get_a_chunk(chunk_size)
             
             
-    def thread_unify_chunk(self, target, path_temp, path_data):
+    def thread_unify_chunk(self, target, path_temp):
         
-        """Unify the compressed numpy array chunks stock in the directory path_temp into a memmapped numpy array in the directory path_data. Unify the array specified by target (ex: 'X_white_1', 'X_black_4', 'y_white' ...)
+        """Unify the compressed numpy array chunks stock in the directory path_temp into a memmapped numpy array in the directory path_temp. Unify the array specified by target (ex: 'X_white_1', 'X_black_4', 'y_white' ...)
         
         :param target: the type of array to unify (X_{black or white}_{1 to 4} or y_{black or white})
         :type target: string
         
         :param path_temp: path of the temporary directory where are stocked the compressed numpy array chunks
         :type path_temp: string
-        
-        :param path_data: path where the memmaped numpy array will be save
-        :type path_data: string
         """
         
         # Choose the shape of the matrice and the dtype according to the target
@@ -166,7 +164,7 @@ class Preprocesser():
         # Read the name of the files (which are the chunk for the given target)
         files = os.listdir(path_temp + target + '/')
         # Create mapped matrices
-        matrices = np.memmap(path_data + target + '.dat', dtype=dtype, mode='w+', shape=shape_matrice)
+        matrices = np.memmap(path_temp + target + '.dat', dtype=dtype, mode='w+', shape=shape_matrice)
         
         index_start = 0
         
@@ -187,8 +185,84 @@ class Preprocesser():
         # Remove the directory
         os.rmdir(path_temp + target + '/')
         
+        
+    def split_dataset(self, path_temp, path_data, size_validation, random_state):
+        
+        """Split the dataset into a part for train/test and a part for validation.
+
+        :param path_temp: path used as temporary directory. Default: './temp/'
+        :type path_temp: string
+        
+        :param path_data: path used as data directory to save final data. Default: './data/'
+        :type path_data: string
+        
+        :param size_validation: size of the validation set (between 0 and 1). Default: 0.2
+        :type size_validation: float
+        
+        :param random_state: number for random initialisation. Default: 42
+        :type random_state: integer
+        """
+        
+        matrices_y = np.memmap(path_temp + 'y_white.dat', dtype=bool, mode='r')
+        
+        for target in ['X_white_1', 'X_white_2', 'X_white_3', 'X_white_4']:
+            
+            if target == 'X_white_1': 
+                dtype = bool
+                shape_matrice = (self._nb_white_moves_done, 8, 8, 12)
+            elif target == 'X_white_2': 
+                dtype = int
+                shape_matrice = (self._nb_white_moves_done, 8, 8, 6)
+            elif target == 'X_white_3': 
+                dtype = float
+                shape_matrice = (self._nb_white_moves_done, 8, 8, 4)
+            elif target == 'X_white_4': 
+                dtype = float
+                shape_matrice = (self._nb_white_moves_done, 8, 8, 2)
+            
+            matrices_X = np.memmap(path_temp + target + '.dat', dtype=dtype, mode='r')
+            matrices_X = matrices_X.reshape(shape_matrice)
+            X, X_val, y, y_val = train_test_split(matrices_X, matrices_y, test_size=size_validation, random_state=random_state)
+            np.savez_compressed(path_data + target, X=X, X_val=X_val, y=y, y_val=y_val)
+            del matrices_X
+            os.remove(path_temp + target + '.dat')
+            
+            print('Preprocessing: ' + target + ' split done                ', end='\r')
+            
+        del matrices_y
+        os.remove(path_temp + 'y_white.dat')
+        
+        matrices_y = np.memmap(path_temp + 'y_black.dat', dtype=bool, mode='r')
+        
+        for target in ['X_black_1', 'X_black_2', 'X_black_3', 'X_black_4']:
+            
+            if target == 'X_black_1': 
+                dtype = bool
+                shape_matrice = (self._nb_black_moves_done, 8, 8, 12)
+            elif target == 'X_black_2': 
+                dtype = int
+                shape_matrice = (self._nb_black_moves_done, 8, 8, 6)
+            elif target == 'X_black_3': 
+                dtype = float
+                shape_matrice = (self._nb_black_moves_done, 8, 8, 4)
+            elif target == 'X_black_4': 
+                dtype = float
+                shape_matrice = (self._nb_black_moves_done, 8, 8, 2)
+            
+            matrices_X = np.memmap(path_temp + target + '.dat', dtype=dtype, mode='r')
+            matrices_X = matrices_X.reshape(shape_matrice)
+            X, X_val, y, y_val = train_test_split(matrices_X, matrices_y, test_size=size_validation, random_state=random_state)
+            np.savez_compressed(path_data + target, X=X, X_val=X_val, y=y, y_val=y_val)
+            del matrices_X
+            os.remove(path_temp + target + '.dat')
+            
+            print('Preprocessing: ' + target + ' split done               ', end='\r')
+        
+        del matrices_y
+        os.remove(path_temp + 'y_black.dat')
+        
                 
-    def create_game_matrices_all_games(self, chunk_size=100, path_temp='./temp/', path_data='./data/'):
+    def create_game_matrices_all_games(self, chunk_size=100, path_temp='./temp/', path_data='./data/', size_validation=0.2, random_state=42):
         
         """Return matrices of game matrix for the 4 method for black and white, and an array for is_white_win for white and for black move.
         
@@ -200,6 +274,12 @@ class Preprocesser():
         
         :param path_data: path used as data directory to save final data. Default: './data/'
         :type path_data: string
+        
+        :param size_validation: size of the validation set (between 0 and 1). Default: 0.2
+        :type size_validation: float
+        
+        :param random_state: number for random initialisation. Default: 42
+        :type random_state: integer
         """
                 
         threads_chunk = []
@@ -228,12 +308,10 @@ class Preprocesser():
         # Wait the end of workers
         for thread in threads_chunk:
             thread.join()
-        
-        print('\nPreprocessing: start unification')
-        
+                
         # Create and start thread to do the task of unify matrices
         for target in targets:
-            thread_target = threading.Thread(target=self.thread_unify_chunk, args=(target, path_temp, path_data, ))
+            thread_target = threading.Thread(target=self.thread_unify_chunk, args=(target, path_temp, ))
             thread_target.start()
             threads_target.append(thread_target)
             
@@ -241,9 +319,13 @@ class Preprocesser():
         for thread_target in threads_target:
             thread_target.join()
             
-        print('Preprocessing: unification done')
+        print('Preprocessing: unification done', end='\r')
+        
+        self.split_dataset(path_temp, path_data, size_validation, random_state)
+        
+        print('Preprocessing: done                           ', end='\r')
 
-
+        
     @property
     def _df_games(self):
         return self.__df_games
