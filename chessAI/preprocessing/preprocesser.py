@@ -116,7 +116,7 @@ class Preprocesser():
                 
             # Get a chunk of data for next iteration
             df_chunk = self.get_a_chunk(chunk_size)
-            
+
             
     def thread_unify_chunk(self, target, path_temp):
         
@@ -160,7 +160,7 @@ class Preprocesser():
         elif target == 'y_black':
             shape_matrice = (self._nb_black_moves_done,)
             dtype = bool
-        
+                    
         # Read the name of the files (which are the chunk for the given target)
         files = os.listdir(path_temp + target + '/')
         # Create mapped matrices
@@ -186,7 +186,7 @@ class Preprocesser():
         os.rmdir(path_temp + target + '/')
         
         
-    def split_dataset(self, path_temp, path_data, size_validation, random_state):
+    def split_dataset(self, targets, path_temp='./temp/', path_data='./data/', size_validation=0.2, random_state=42):
         
         """Split the dataset into a part for train/test and a part for validation.
 
@@ -199,67 +199,127 @@ class Preprocesser():
         :param size_validation: size of the validation set (between 0 and 1). Default: 0.2
         :type size_validation: float
         
+        :param targets: list of the different targets
+        :type targets: list of string
+        
         :param random_state: number for random initialisation. Default: 42
         :type random_state: integer
         """
         
-        matrices_y = np.memmap(path_temp + 'y_white.dat', dtype=bool, mode='r')
+        # Initialize the random seed to reproductibility
+        np.random.seed(random_state)
+
+        # Create index from 0 to last move
+        index_white = np.arange(0, self._nb_white_moves_done)
+        index_black = np.arange(0, self._nb_black_moves_done)
         
-        for target in ['X_white_1', 'X_white_2', 'X_white_3', 'X_white_4']:
-            
-            if target == 'X_white_1': 
+        # Shuffle the index
+        np.random.shuffle(index_white)
+        np.random.shuffle(index_black)
+        
+        # Compute the number of moves in validation set
+        nb_val_white = int(size_validation * self._nb_white_moves_done)
+        nb_val_black = int(size_validation * self._nb_black_moves_done)
+        
+        # Split the index between validation and training
+        val_index_white = index_white[:nb_val_white]
+        train_index_white = index_white[nb_val_white:]
+        val_index_black = index_black[:nb_val_black]
+        train_index_black = index_black[nb_val_black:]
+        
+        # Iterate over targets
+        for target in targets:
+            # Choose parameters regarding the target
+            if target == 'X_white_1':
                 dtype = bool
                 shape_matrice = (self._nb_white_moves_done, 8, 8, 12)
-            elif target == 'X_white_2': 
+                shape_matrice_val = (nb_val_white, 8, 8, 12)
+                shape_matrice_train = (self._nb_white_moves_done - nb_val_white, 8, 8, 12)
+                val_index = val_index_white
+                train_index = train_index_white
+            elif target == 'X_white_2':
                 dtype = int
                 shape_matrice = (self._nb_white_moves_done, 8, 8, 6)
-            elif target == 'X_white_3': 
+                shape_matrice_val = (nb_val_white, 8, 8, 6)
+                shape_matrice_train = (self._nb_white_moves_done - nb_val_white, 8, 8, 6)
+                val_index = val_index_white
+                train_index = train_index_white
+            elif target == 'X_white_3':
                 dtype = float
                 shape_matrice = (self._nb_white_moves_done, 8, 8, 4)
-            elif target == 'X_white_4': 
+                shape_matrice_val = (nb_val_white, 8, 8, 4)
+                shape_matrice_train = (self._nb_white_moves_done - nb_val_white, 8, 8, 4)
+                val_index = val_index_white
+                train_index = train_index_white
+            elif target == 'X_white_4':
                 dtype = float
                 shape_matrice = (self._nb_white_moves_done, 8, 8, 2)
-            
-            matrices_X = np.memmap(path_temp + target + '.dat', dtype=dtype, mode='r')
-            matrices_X = matrices_X.reshape(shape_matrice)
-            X, X_val, y, y_val = train_test_split(matrices_X, matrices_y, test_size=size_validation, random_state=random_state)
-            np.savez_compressed(path_data + target, X=X, X_val=X_val, y=y, y_val=y_val)
-            del matrices_X
-            os.remove(path_temp + target + '.dat')
-            
-            print('Preprocessing: ' + target + ' split done                ', end='\r')
-            
-        del matrices_y
-        os.remove(path_temp + 'y_white.dat')
-        
-        matrices_y = np.memmap(path_temp + 'y_black.dat', dtype=bool, mode='r')
-        
-        for target in ['X_black_1', 'X_black_2', 'X_black_3', 'X_black_4']:
-            
-            if target == 'X_black_1': 
+                shape_matrice_val = (nb_val_white, 8, 8, 2)
+                shape_matrice_train = (self._nb_white_moves_done - nb_val_white, 8, 8, 2)
+                val_index = val_index_white
+                train_index = train_index_white
+            elif target == 'y_white':
+                dtype = bool
+                shape_matrice = (self._nb_white_moves_done, )
+                shape_matrice_val = (nb_val_white, )
+                shape_matrice_train = (self._nb_white_moves_done - nb_val_white, )
+                val_index = val_index_white
+                train_index = train_index_white
+            elif target == 'X_black_1':
                 dtype = bool
                 shape_matrice = (self._nb_black_moves_done, 8, 8, 12)
-            elif target == 'X_black_2': 
+                shape_matrice_val = (nb_val_black, 8, 8, 12)
+                shape_matrice_train = (self._nb_black_moves_done - nb_val_black, 8, 8, 12)
+                val_index = val_index_black
+                train_index = train_index_black
+            elif target == 'X_black_2':
                 dtype = int
                 shape_matrice = (self._nb_black_moves_done, 8, 8, 6)
-            elif target == 'X_black_3': 
+                shape_matrice_val = (nb_val_black, 8, 8, 6)
+                shape_matrice_train = (self._nb_black_moves_done - nb_val_black, 8, 8, 6)
+                val_index = val_index_black
+                train_index = train_index_black
+            elif target == 'X_black_3':
                 dtype = float
                 shape_matrice = (self._nb_black_moves_done, 8, 8, 4)
-            elif target == 'X_black_4': 
+                shape_matrice_val = (nb_val_black, 8, 8, 4)
+                shape_matrice_train = (self._nb_black_moves_done - nb_val_black, 8, 8, 4)
+                val_index = val_index_black
+                train_index = train_index_black
+            elif target == 'X_black_4':
                 dtype = float
                 shape_matrice = (self._nb_black_moves_done, 8, 8, 2)
+                shape_matrice_val = (nb_val_black, 8, 8, 2)
+                shape_matrice_train = (self._nb_black_moves_done - nb_val_black, 8, 8, 2)
+                val_index = val_index_black
+                train_index = train_index_black
+            elif target == 'y_black':
+                dtype = bool
+                shape_matrice = (self._nb_black_moves_done, )
+                shape_matrice_val = (nb_val_black, )
+                shape_matrice_train = (self._nb_black_moves_done - nb_val_black, )
+                val_index = val_index_black
+                train_index = train_index_black
+                            
+            # Read the matrices
+            matrices = np.memmap(path_temp + target + '.dat', dtype=dtype, mode='r', shape=shape_matrice)
+            # Create new matrices for validation and training set
+            matrices_val = np.memmap(path_data + target + '_val.dat', dtype=dtype, mode='w+', shape=shape_matrice_val)
+            matrices_train = np.memmap(path_data + target + '_tuning.dat', dtype=dtype, mode='w+', shape=shape_matrice_train)
             
-            matrices_X = np.memmap(path_temp + target + '.dat', dtype=dtype, mode='r')
-            matrices_X = matrices_X.reshape(shape_matrice)
-            X, X_val, y, y_val = train_test_split(matrices_X, matrices_y, test_size=size_validation, random_state=random_state)
-            np.savez_compressed(path_data + target, X=X, X_val=X_val, y=y, y_val=y_val)
-            del matrices_X
+            # Assign value to matrices
+            matrices_val[:] = matrices[val_index]
+            matrices_train[:] = matrices[train_index]
+            
+            # Delete from RAM
+            del matrices
+            del matrices_val
+            del matrices_train
+            
+            # Delete from disk
             os.remove(path_temp + target + '.dat')
             
             print('Preprocessing: ' + target + ' split done               ', end='\r')
-        
-        del matrices_y
-        os.remove(path_temp + 'y_black.dat')
         
                 
     def create_game_matrices_all_games(self, chunk_size=100, path_temp='./temp/', path_data='./data/', size_validation=0.2, random_state=42):
@@ -321,7 +381,7 @@ class Preprocesser():
             
         print('Preprocessing: unification done', end='\r')
         
-        self.split_dataset(path_temp, path_data, size_validation, random_state)
+        self.split_dataset(targets, path_temp, path_data, size_validation, random_state)
         
         print('Preprocessing: done                           ', end='\r')
 
