@@ -14,14 +14,20 @@ class Preprocesser():
     
     :param _df_games: dataframe from the scraper with columns pgn_text and is_white_win
     :type _df_games: pd.DataFrame
+    
+    :param _nb_white_moves_done: number of white moves in the dataset
+    :type _nb_white_moves_done: integer
+    
+    :param _nb_black_moves_done: number of black moves in the dataset
+    :type _nb_black_moves_done: integer
     """
     
-    def __init__(self, df_games):
+    def __init__(self, df_games, nb_white_moves_done=0, nb_black_moves_done=0):
         
         self._df_games = df_games
         self._nb_games_done = 0
-        self._nb_white_moves_done = 0
-        self._nb_black_moves_done = 0
+        self._nb_white_moves_done = nb_white_moves_done
+        self._nb_black_moves_done = nb_black_moves_done
         self._n_chunk = 1
         self._lock_df_games = threading.Lock()
         self._lock_nb_games_done = threading.Lock()
@@ -35,6 +41,7 @@ class Preprocesser():
             - chunk_size if the size of the df is superior or equal to chunk_size
             - the size of the df if its size is inferior but not 0
             - an empty df else
+            
         :param chunk_size: size of the chunk
         :type chunk_size: integer
         
@@ -186,7 +193,7 @@ class Preprocesser():
         os.rmdir(path_temp + target + '/')
         
         
-    def split_dataset(self, targets, path_temp='./temp/', path_data='./data/', size_validation=0.2, random_state=42):
+    def split_dataset(self, path_temp='./temp/', path_data='./data/', size_validation=0.2, random_state=42):
         
         """Split the dataset into a part for train/test and a part for validation.
 
@@ -199,12 +206,11 @@ class Preprocesser():
         :param size_validation: size of the validation set (between 0 and 1). Default: 0.2
         :type size_validation: float
         
-        :param targets: list of the different targets
-        :type targets: list of string
-        
         :param random_state: number for random initialisation. Default: 42
         :type random_state: integer
         """
+        
+        targets = ['X_white_1', 'X_white_2', 'X_white_3', 'X_white_4', 'X_black_1', 'X_black_2', 'X_black_3', 'X_black_4', 'y_white', 'y_black']
         
         # Initialize the random seed to reproductibility
         np.random.seed(random_state)
@@ -320,41 +326,29 @@ class Preprocesser():
             os.remove(path_temp + target + '.dat')
             
             print('Preprocessing: ' + target + ' split done               ', end='\r')
+            
+        print('Preprocessing: all splits done                      ', end='\r')
+            
+            
+    def create_game_matrices_chunks(self, chunk_size=100, path_temp='./temp/'):
         
-                
-    def create_game_matrices_all_games(self, chunk_size=100, path_temp='./temp/', path_data='./data/', size_validation=0.2, random_state=42):
-        
-        """Return matrices of game matrix for the 4 method for black and white, and an array for is_white_win for white and for black move.
+        """Create game matrix chunks in path_temp using the df of games for 4 methods.
         
         :param chunk_size: size of the chunks of dataframe to preprocess. If memory problems, decrease this number. Default: 100
         :type chunk_size: integer
         
         :param path_temp: path used as temporary directory to work with chunk. Default: './temp/'
         :type path_temp: string
-        
-        :param path_data: path used as data directory to save final data. Default: './data/'
-        :type path_data: string
-        
-        :param size_validation: size of the validation set (between 0 and 1). Default: 0.2
-        :type size_validation: float
-        
-        :param random_state: number for random initialisation. Default: 42
-        :type random_state: integer
         """
-                
+        
         threads_chunk = []
-        threads_target = []
-        targets = ['X_white_1', 'X_white_2', 'X_white_3', 'X_white_4', 'X_black_1', 'X_black_2', 'X_black_3', 'X_black_4', 'y_white', 'y_black']
         n_core = multiprocessing.cpu_count()
+        targets = ['X_white_1', 'X_white_2', 'X_white_3', 'X_white_4', 'X_black_1', 'X_black_2', 'X_black_3', 'X_black_4', 'y_white', 'y_black']
         nb_games = self._df_games.shape[0]
         
         # Reset index (usefull if the given df is a fragment of a df)
         self._df_games.reset_index(drop=True, inplace=True)
         
-        # Check temp directory and create it if it does not exist
-        if not os.path.exists(path_temp):
-            os.makedirs(path_temp)
-            
         # Create temp subdirectory
         for target in targets:
             if not os.path.exists(path_temp + target + '/'):
@@ -368,31 +362,27 @@ class Preprocesser():
         # Wait the end of workers
         for thread in threads_chunk:
             thread.join()
-                
+            
+            
+    def unify_chunk(self, path_temp='./temp/'):
+        
+        """Unify the chunk create by create_game_matrices_chunks
+        
+        :param path_temp: path used as temporary directory to work with chunk. Default: './temp/'
+        :type path_temp: string
+        """
+        
+        targets = ['X_white_1', 'X_white_2', 'X_white_3', 'X_white_4', 'X_black_1', 'X_black_2', 'X_black_3', 'X_black_4', 'y_white', 'y_black']
+        threads_unify = []
+        
         # Create and start thread to do the task of unify matrices
         for target in targets:
-            thread_target = threading.Thread(target=self.thread_unify_chunk, args=(target, path_temp, ))
-            thread_target.start()
-            threads_target.append(thread_target)
+            thread_unify = threading.Thread(target=self.thread_unify_chunk, args=(target, path_temp, ))
+            thread_unify.start()
+            threads_unify.append(thread_unify)
             
         # Wait the end of workers
-        for thread_target in threads_target:
-            thread_target.join()
+        for thread_unify in threads_unify:
+            thread_unify.join()
             
-        print('Preprocessing: unification done', end='\r')
-        
-        self.split_dataset(targets, path_temp, path_data, size_validation, random_state)
-        
-        print('Preprocessing: done                           ', end='\r')
-
-        
-    @property
-    def _df_games(self):
-        return self.__df_games
-
-    
-    @_df_games.setter
-    def _df_games(self, df_games):
-        self.__df_games = df_games
-        
-        
+        print('Preprocessing: unification done                 ', end='\r')
