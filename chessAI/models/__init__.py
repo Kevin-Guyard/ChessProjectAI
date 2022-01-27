@@ -1,0 +1,1 @@
+from chessAI.models.functionsModels import get_model
