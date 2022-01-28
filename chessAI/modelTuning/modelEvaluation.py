@@ -38,7 +38,7 @@ def evaluate_model_accuracy_CV(color_dataset, n_method, parameters, path_data='.
         
         losses_train = []
         
-        for epoch in range(0, n_epochs+1):
+        for epoch in range(0, n_epochs):
             
             losses_train_batch = []
             dataset.set_mode('training')
