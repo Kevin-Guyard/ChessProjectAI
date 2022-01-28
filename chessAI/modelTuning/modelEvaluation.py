@@ -8,9 +8,13 @@ from chessAI.models import get_model
 
 def evaluate_model_accuracy_CV(color_dataset, n_method, parameters, path_data='./data/', path_temp='./temp/', n_epochs=100, batch_size=100, nb_splits_CV=2, tolerance=1e-7, random_state=42):
     
+    torch.manual_seed(random_state)
+    random.seed(random_state)
+    np.random.seed(random_state)
+    
     accuracies_test = []
     dataset = ChessDatasetTuning(color_dataset=color_dataset, n_method=n_method, shape_X=parameters['shape_X'], path_data=path_data, nb_splits_CV=nb_splits_CV, random_state=random_state)
-    dataloader = DataLoader(dataset, batch_size=batch_size)
+    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
         
     # CV loop
     while True:
