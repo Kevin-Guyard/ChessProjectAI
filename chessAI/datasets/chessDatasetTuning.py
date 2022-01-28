@@ -5,14 +5,14 @@ from torch.utils.data import Dataset
 
 class ChessDatasetTuning(Dataset):
     
-    def __init__(self, color_dataset, n_method, shape_X, path_data='./data/', n_splits_CV=2, random_state=42):
+    def __init__(self, color_dataset, n_method, shape_X, path_data='./data/', nb_splits_CV=2, random_state=42):
         
         path_X, path_y, dtype_X = self.get_path_and_dtype(path_data, color_dataset, n_method)
         
         self._X = np.memmap(path_X, dtype=dtype_X, mode='r')
         self._X = self._X.reshape((int(self._X.shape[0] / np.sum(shape_X)), ) + shape_X)
         self._y = np.memmap(path_y, dtype=bool, mode='r')
-        self._kf_CV_iter = iter(KFold(n_splits=n_splits_CV, random_state=random_state, shuffle=True).split(self._X))
+        self._kf_CV_iter = iter(KFold(n_splits=nb_splits_CV, random_state=random_state, shuffle=True).split(self._X))
         self._mode = 'training'
         self._train_index = None
         self._test_index = None
