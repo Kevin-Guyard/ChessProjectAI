@@ -6,6 +6,29 @@ from torch.utils.data import DataLoader
 from chessAI.datasets import ChessDatasetTuning
 from chessAI.models import get_model
 
+def save_model(model_state_dict, optimizer_state_dict, losses_train, accuracies_test, epoch, n_split_CV, is_training, path_temp='./temp/'):
+    
+    torch.save({
+        'model_state_dict': model_state_dict,
+        'optimizer_state_dict': optimizer_state_dict,
+        'losses_train': losses_train,
+        'accuracies_test': accuracies_test,
+        'epoch': epoch,
+        'n_split_CV': n_split_CV,
+        'is_training': is_training
+    }, path_temp + 'backup/model_backup.pth')
+    
+    
+def load_model(path_temp):
+    
+    if not os.path.exists(path_temp + 'backup/model_backup.pth'):
+        checkpoint = None
+    else:
+        checkpoint = torch.load(path_temp + 'backup/model_backup.pth')
+        
+    return checkpoint
+    
+
 def evaluate_model_accuracy_CV(color_dataset, n_method, parameters, path_data='./data/', path_temp='./temp/', n_epochs=100, batch_size=100, nb_splits_CV=2, tolerance=1e-7, random_state=42):
     
     torch.manual_seed(random_state)
@@ -15,12 +38,25 @@ def evaluate_model_accuracy_CV(color_dataset, n_method, parameters, path_data='.
     accuracies_test = []
     dataset = ChessDatasetTuning(color_dataset=color_dataset, n_method=n_method, shape_X=parameters['shape_X'], path_data=path_data, nb_splits_CV=nb_splits_CV, random_state=random_state)
     dataloader = DataLoader(dataset, batch_size=batch_size)
+    
+    n_split_CV = 0
+    
+    checkpoint = load_model(path_temp=path_temp)
+    
+    if checkpoint != None:
+        accuracies_test = checkpoint['accuracies_test'].copy()
+        for n in range(1, checkpoint['n_split_CV']):
+            dataset.update_set_CV()
+            n_split_CV += 1
         
     # CV loop
     while True:
-            
+        
+        losses_train = []
+ 
         try:
             dataset.update_set_CV()
+            n_split_CV +=1
         except StopIteration:
             break
             
@@ -36,9 +72,17 @@ def evaluate_model_accuracy_CV(color_dataset, n_method, parameters, path_data='.
         criterion = torch.nn.BCELoss()
         optimizer = torch.optim.Adam(model.parameters(), lr=parameters['learning_rate'], weight_decay=parameters['weight_decay'])
         
-        losses_train = []
+        if checkpoint != None and checkpoint['is_training'] == True:
+            losses_train = checkpoint['losses_train'].copy()
+            n_epoch = checkpoint['epoch']
+            model.load_state_dict(checkpoint['model_state_dict'])
+            optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+            checkpoint = None
+        else:
+            losses_train = []
+            n_epoch = 0
         
-        for epoch in range(0, n_epochs):
+        for epoch in range(n_epoch, n_epochs):
             
             losses_train_batch = []
             dataset.set_mode('training')
@@ -70,7 +114,12 @@ def evaluate_model_accuracy_CV(color_dataset, n_method, parameters, path_data='.
             losses_train.append(np.mean(losses_train_batch))
             
             if epoch > 0 and np.abs(losses_train[-1] - losses_train[-2]) < tolerance:
+                save_model(model_state_dict=model.state_dict(), optimizer_state_dict=optimizer.state_dict(), losses_train=losses_train, \
+                           accuracies_test=accuracies_test, epoch=n_epochs, n_split_CV=n_split_CV, is_training=True, path_temp=path_temp)
                 break
+            else:
+                save_model(model_state_dict=model.state_dict(), optimizer_state_dict=optimizer.state_dict(), losses_train=losses_train, \
+                           accuracies_test=accuracies_test, epoch=epoch+1, n_split_CV=n_split_CV, is_training=True, path_temp=path_temp)
             
         nb_correct_pred = 0
         nb_total_pred = 0
@@ -105,6 +154,11 @@ def evaluate_model_accuracy_CV(color_dataset, n_method, parameters, path_data='.
         accuracy_test = 100 * nb_correct_pred / nb_total_pred
         accuracies_test.append(accuracy_test)
         
+        save_model(model_state_dict=None, optimizer_state_dict=None, losses_train=None, accuracies_test=accuracies_test, \
+                   epoch=None, n_split_CV=n_split_CV+1, is_training=False, path_temp=path_temp)
+                
     accuracy_test_CV = np.mean(accuracies_test)
+    
+    os.remove(path_temp + 'backup/model_backup.pth')
     
     return accuracy_test_CV
