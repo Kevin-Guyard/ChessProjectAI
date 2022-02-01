@@ -97,7 +97,7 @@ def evaluate_model_accuracy_CV(color_dataset, n_method, parameters, path_data='.
                 except StopIteration:
                     break
                     
-                X_train, y_train = batch['X_train'].float(), batch['y_train'].float()
+                X_train, y_train = batch['X_train'], batch['y_train']
                     
                 optimizer.zero_grad()
                 outputs_training = torch.squeeze(model(X_train))
@@ -132,7 +132,7 @@ def evaluate_model_accuracy_CV(color_dataset, n_method, parameters, path_data='.
             except StopIteration:
                 break
                 
-            X_test, y_test = batch['X_test'].float(), batch['y_test'].float()
+            X_test, y_test = batch['X_test'], batch['y_test']
                 
             with torch.no_grad():
             
