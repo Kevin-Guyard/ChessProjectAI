@@ -10,12 +10,11 @@ class ChessDatasetTuning(Dataset):
         self._memory_map = memory_map
         self._nb_splits_CV = nb_splits_CV
         self._random_state = random_state
-        self._kf_CV_iter = None
         self._mode = 'training'
         self._train_index = None
         self._test_index = None
-        
         self.read_data(color_dataset=color_dataset, n_method=n_method, shape_X=shape_X, path_data=path_data)
+        self._kf_CV_iter = self.init_kf_CV_iter()
         
         
     def __len__(self):
