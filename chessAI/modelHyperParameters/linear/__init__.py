@@ -4,4 +4,3 @@ from chessAI.modelHyperParameters.linear.linearNN2 import get_list_model_paramet
 from chessAI.modelHyperParameters.linear.linearNN3 import get_list_model_parameters_LinearNN3
 from chessAI.modelHyperParameters.linear.linearNN4 import get_list_model_parameters_LinearNN4
 from chessAI.modelHyperParameters.linear.linearNN5 import get_list_model_parameters_LinearNN5
-from chessAI.modelHyperParameters.linear.linear import get_shape_X_linear

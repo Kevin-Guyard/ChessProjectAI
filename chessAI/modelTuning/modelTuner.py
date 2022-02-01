@@ -11,7 +11,7 @@ class ModelTuner():
         self._n_chunk = 1
         
         
-    def tuning(self, color_dataset, n_method, path_data='./data/', path_temp='./temp/', n_epochs=100, batch_size=100, nb_splits_CV=2, tolerance=1e-7, random_state=42, memory_map=True):
+    def tuning(self, color_dataset, n_method, model_name, path_data='./data/', path_temp='./temp/', n_epochs=100, batch_size=100, nb_splits_CV=2, tolerance=1e-7, random_state=42, memory_map=True):
         
         if not os.path.exists(path_temp + 'tuning_data/'):
             os.mkdir(path_temp + 'tuning_data/')
@@ -26,7 +26,7 @@ class ModelTuner():
                 backup = json.load(file)
                 n_chunk = backup['n_chunk']
                 
-        parameters_tuning = get_parameters_tuning(n_method)
+        parameters_tuning = get_parameters_tuning(n_method=n_method, model_name=model_name)
         
         while n_chunk != self._n_chunk:
             parameters_tuning.pop(0)

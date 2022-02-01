@@ -1,37 +1,20 @@
 from chessAI.modelHyperParameters.linear import *
 
-def get_parameters_tuning(n_method):
+def get_parameters_tuning(n_method, model_name):
     
     parameters_tuning = []
-    models_name = get_models_name()
     weights_decay = get_weights_decay()
     learning_rates = get_learning_rates()
     
-    for model_name in models_name:
-        list_model_parameters = get_list_model_parameters(model_name=model_name, n_method=n_method)
-        shape_X = get_shape_X(model_name, n_method)
-        for model_parameters in list_model_parameters:
-            for learning_rate in learning_rates:
-                for weight_decay in weights_decay:
-                    dic_parameters = {'learning_rate': learning_rate, 'weight_decay': weight_decay, 'shape_X': shape_X}
-                    dic_parameters.update(model_parameters)
-                    parameters_tuning.append(dic_parameters)
+    list_model_parameters = get_list_model_parameters(model_name=model_name, n_method=n_method)
+    for model_parameters in list_model_parameters:
+        for learning_rate in learning_rates:
+            for weight_decay in weights_decay:
+                dic_parameters = {'learning_rate': learning_rate, 'weight_decay': weight_decay}
+                dic_parameters.update(model_parameters)
+                parameters_tuning.append(dic_parameters)
                     
     return parameters_tuning
-
-
-def get_models_name():
-    
-    models_name = [
-        'LogisticRegression',
-        'LinearNN1',
-        'LinearNN2',
-        'LinearNN3',
-        'LinearNN4',
-        'LinearNN5'
-    ]
-    
-    return models_name
 
 
 def get_list_model_parameters(model_name, n_method):
@@ -46,23 +29,12 @@ def get_list_model_parameters(model_name, n_method):
     return model_parameters
 
 
-def get_shape_X(model_name, n_method):
-    
-    if model_name == 'LogisticRegression': shape_X = get_shape_X_linear(n_method)
-    elif model_name == 'LinearNN1': shape_X = get_shape_X_linear(n_method)
-    elif model_name == 'LinearNN2': shape_X = get_shape_X_linear(n_method)
-    elif model_name == 'LinearNN3': shape_X = get_shape_X_linear(n_method)
-    elif model_name == 'LinearNN4': shape_X = get_shape_X_linear(n_method)
-    elif model_name == 'LinearNN5': shape_X = get_shape_X_linear(n_method)
-        
-    return shape_X
-
-
 def get_weights_decay():
     
     weights_decay = [1e-3, 1e-2, 1e-1, 1e0]
     
     return weights_decay
+
 
 def get_learning_rates():
     
