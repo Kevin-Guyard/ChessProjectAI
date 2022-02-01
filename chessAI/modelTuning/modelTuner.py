@@ -18,6 +18,8 @@ class ModelTuner():
             
         if not os.path.exists(path_temp + 'backup/'):
             os.mkdir(path_temp + 'backup/')
+        
+        if not os.path.exists(path_temp + 'backup/tuning_backup.json'):
             n_chunk = 1
         else:
             with open(path_temp + 'backup/tuning_backup.json', 'r') as file:
