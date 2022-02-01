@@ -11,7 +11,7 @@ class ModelTuner():
         self._n_chunk = 1
         
         
-    def tuning(self, color_dataset, n_method, path_data='./data/', path_temp='./temp/', n_epochs=100, batch_size=100, nb_splits_CV=2, tolerance=1e-7, random_state=42):
+    def tuning(self, color_dataset, n_method, path_data='./data/', path_temp='./temp/', n_epochs=100, batch_size=100, nb_splits_CV=2, tolerance=1e-7, random_state=42, memory_map=True):
         
         if not os.path.exists(path_temp + 'tuning_data/'):
             os.mkdir(path_temp + 'tuning_data/')
@@ -32,7 +32,7 @@ class ModelTuner():
         
         for parameters in parameters_tuning:
             
-            accuracy_test_CV = evaluate_model_accuracy_CV(color_dataset=color_dataset, n_method=n_method, parameters=parameters, path_data=path_data, path_temp=path_temp, n_epochs=n_epochs, batch_size=batch_size, nb_splits_CV=nb_splits_CV, tolerance=tolerance, random_state=random_state)
+            accuracy_test_CV = evaluate_model_accuracy_CV(color_dataset=color_dataset, n_method=n_method, parameters=parameters, path_data=path_data, path_temp=path_temp, n_epochs=n_epochs, batch_size=batch_size, nb_splits_CV=nb_splits_CV, tolerance=tolerance, random_state=random_state, memory_map=memory_map)
             
             dic_result = {'accuracy_test_CV': accuracy_test_CV}
             dic_result.update(parameters)

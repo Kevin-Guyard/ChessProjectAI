@@ -5,17 +5,17 @@ from torch.utils.data import Dataset
 
 class ChessDatasetTuning(Dataset):
     
-    def __init__(self, color_dataset, n_method, shape_X, path_data='./data/', nb_splits_CV=2, random_state=42):
+    def __init__(self, color_dataset, n_method, shape_X, path_data='./data/', nb_splits_CV=2, random_state=42, memory_map=True):
         
-        path_X, path_y, dtype_X = self.get_path_and_dtype(path_data, color_dataset, n_method)
-        
-        self._X = np.memmap(path_X, dtype=dtype_X, mode='r')
-        self._X = self._X.reshape((int(self._X.shape[0] / np.prod(shape_X)), ) + shape_X)
-        self._y = np.memmap(path_y, dtype=bool, mode='r')
-        self._kf_CV_iter = iter(KFold(n_splits=nb_splits_CV, random_state=random_state, shuffle=True).split(self._X))
+        self._memory_map = memory_map
+        self._nb_splits_CV = nb_splits_CV
+        self._random_state = random_state
+        self._kf_CV_iter = None
         self._mode = 'training'
         self._train_index = None
         self._test_index = None
+        
+        self.read_data(color_dataset=color_dataset, n_method=n_method, shape_X=shape_X, path_data=path_data)
         
         
     def __len__(self):
@@ -33,12 +33,36 @@ class ChessDatasetTuning(Dataset):
         
         if self._mode == 'training': 
             train_idx = self._train_index[idx]
-            item = {'X_train': np.array(self._X[train_idx]), 'y_train': np.array(self._y[train_idx])}
+            if self._memory_map == True:
+                item = {'X_train': np.array(self._X[train_idx]), 'y_train': np.array(self._y[train_idx])}
+            else:
+                item = {'X_train': self._X[train_idx], 'y_train': self._y[train_idx]}
         elif self._mode == 'testing': 
             test_idx = self._test_index[idx]
-            item = {'X_test': np.array(self._X[test_idx]), 'y_test': np.array(self._y[test_idx])}
+            if self._memory_map == True:
+                item = {'X_test': np.array(self._X[test_idx]), 'y_test': np.array(self._y[test_idx])}
+            else:
+                item = {'X_test': self._X[test_idx], 'y_test': self._y[test_idx]}
             
         return item
+    
+    
+    def read_data(self, color_dataset, n_method, shape_X, path_data):
+        
+        path_X, path_y, dtype_X = self.get_path_and_dtype(path_data, color_dataset, n_method)
+        
+        self._X = np.memmap(path_X, dtype=dtype_X, mode='r')
+        self._X = self._X.reshape((int(self._X.shape[0] / np.prod(shape_X)), ) + shape_X)
+        self._y = np.memmap(path_y, dtype=bool, mode='r')
+        
+        if self._memory_map == False:
+            self._X = torch.Tensor(np.array(self._X))
+            self._y = torch.Tensor(np.array(self._y))
+            
+            
+    def init_kf_CV_iter(self):
+        
+        self._kf_CV_iter = iter(KFold(n_splits=self._nb_splits_CV, random_state=self._random_state, shuffle=True).split(self._X))
     
     
     def update_set_CV(self):
