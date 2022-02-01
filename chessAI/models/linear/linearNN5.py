@@ -6,6 +6,8 @@ class LinearNN5(torch.nn.Module):
         
         super(LinearNN5, self).__init__()
         
+        self.flatten = torch.nn.Flatten()
+        
         self.linear1 = torch.nn.Linear(in_features=parameters['input_size'], out_features=parameters['hidden_size1'])
         if parameters['activation1'] == 'ReLU':
             self.activation1 = torch.nn.ReLU()
@@ -42,11 +44,18 @@ class LinearNN5(torch.nn.Module):
         
     def forward(self, x):
         
-        x1 = self.activation1(self.linear1(x))
-        x2 = self.activation2(self.linear2(x1))
-        x3 = self.activation3(self.linear3(x2))
-        x4 = self.activation4(self.linear4(x3))
-        x5 = self.activation5(self.linear5(x4))
-        outputs = self.activation6(self.linear6(x5))
+        x = self.flatten(x)
+        x = self.linear1(x)
+        x = self.activation1(x)
+        x = self.linear2(x)
+        x = self.activation2(x)
+        x = self.linear3(x)
+        x = self.activation3(x)
+        x = self.linear4(x)
+        x = self.activation4(x)
+        x = self.linear5(x)
+        x = self.activation5(x)
+        x = self.linear6(x)
+        outputs = self.activation6(x)
         
         return outputs
