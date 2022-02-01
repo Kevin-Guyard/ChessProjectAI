@@ -5,7 +5,7 @@ from torch.utils.data import Dataset
 
 class ChessDatasetTuning(Dataset):
     
-    def __init__(self, color_dataset, n_method, shape_X, path_data='./data/', nb_splits_CV=2, random_state=42, memory_map=True):
+    def __init__(self, color_dataset, n_method, path_data='./data/', nb_splits_CV=2, random_state=42, memory_map=True):
         
         self._memory_map = memory_map
         self._nb_splits_CV = nb_splits_CV
@@ -13,7 +13,7 @@ class ChessDatasetTuning(Dataset):
         self._mode = 'training'
         self._train_index = None
         self._test_index = None
-        self.read_data(color_dataset=color_dataset, n_method=n_method, shape_X=shape_X, path_data=path_data)
+        self.read_data(color_dataset=color_dataset, n_method=n_method, path_data=path_data)
         self.init_kf_CV_iter()
         
         
@@ -46,9 +46,9 @@ class ChessDatasetTuning(Dataset):
         return item
     
     
-    def read_data(self, color_dataset, n_method, shape_X, path_data):
+    def read_data(self, color_dataset, n_method, path_data):
         
-        path_X, path_y, dtype_X = self.get_path_and_dtype(path_data, color_dataset, n_method)
+        path_X, path_y, dtype_X, shape_X = self.get_path_and_dtype(path_data, color_dataset, n_method)
         
         self._X = np.memmap(path_X, dtype=dtype_X, mode='r')
         self._X = self._X.reshape((int(self._X.shape[0] / np.prod(shape_X)), ) + shape_X)
@@ -88,11 +88,15 @@ class ChessDatasetTuning(Dataset):
         
         if n_method == 1: 
             dtype_X = bool
+            shape_X = (8, 8, 12, )
         elif n_method == 2: 
             dtype_X = int
+            shape_X = (8, 8, 6, )
         elif n_method == 3: 
             dtype_X = float
+            shape_X = (8, 8, 4, )
         elif n_method == 4: 
             dtype_X = float
+            shape_X = (8, 8, 2, )
             
-        return path_X, path_y, dtype_X
+        return path_X, path_y, dtype_X, shape_X

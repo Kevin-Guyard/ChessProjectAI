@@ -36,7 +36,7 @@ def evaluate_model_accuracy_CV(color_dataset, n_method, parameters, path_data='.
     np.random.seed(random_state)
     
     accuracies_test = []
-    dataset = ChessDatasetTuning(color_dataset=color_dataset, n_method=n_method, shape_X=parameters['shape_X'], path_data=path_data, nb_splits_CV=nb_splits_CV, random_state=random_state, memory_map=memory_map)
+    dataset = ChessDatasetTuning(color_dataset=color_dataset, n_method=n_method, path_data=path_data, nb_splits_CV=nb_splits_CV, random_state=random_state, memory_map=memory_map)
     dataloader = DataLoader(dataset, batch_size=batch_size)
     
     n_split_CV = 0

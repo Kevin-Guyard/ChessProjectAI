@@ -38,7 +38,7 @@ class ModelTuner():
             
             dic_result = {'accuracy_test_CV': accuracy_test_CV}
             dic_result.update(parameters)
-            df_result = pd.DataFrame(dic_result)
+            df_result = pd.DataFrame(dic_result, index=[0])
             df_result.to_csv(path_temp + 'tuning_data/df_result_' + str(self._n_chunk) + '.csv.gz', encoding='utf-8', compression='gzip', sep='\t', index=False)
             
             self._n_chunk += 1
