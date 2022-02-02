@@ -97,7 +97,11 @@ def evaluate_model_accuracy_CV(color_dataset, n_method, parameters, path_data='.
                 except StopIteration:
                     break
                     
-                X_train, y_train = batch['X_train'], batch['y_train']
+                X_train, y_train = batch['X_train'].float(), batch['y_train'].float()
+                
+                if torch.cuda.is_available():
+                    X_train = X_train.to(device='cuda')
+                    y_train = y_train.to(device='cuda')
                     
                 optimizer.zero_grad()
                 outputs_training = torch.squeeze(model(X_train))
@@ -132,7 +136,10 @@ def evaluate_model_accuracy_CV(color_dataset, n_method, parameters, path_data='.
             except StopIteration:
                 break
                 
-            X_test, y_test = batch['X_test'], batch['y_test']
+            X_test, y_test = batch['X_test'].float(), batch['y_test']
+            
+            if torch.cuda.is_available():
+                X_test = X_test.to(device='cuda')
                 
             with torch.no_grad():
             

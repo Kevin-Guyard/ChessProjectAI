@@ -56,12 +56,8 @@ class ChessDatasetTuning(Dataset):
         
         if self._memory_map == False:
     
-            self._X = torch.Tensor(np.array(self._X)).float()
-            self._y = torch.Tensor(np.array(self._y)).float()
-            
-            if torch.cuda.is_available():
-                self._X = self._X.to(device='cuda')
-                self._y = self._y.to(device='cuda')
+            self._X = torch.Tensor(np.array(self._X))
+            self._y = torch.Tensor(np.array(self._y))
             
             
     def init_kf_CV_iter(self):
