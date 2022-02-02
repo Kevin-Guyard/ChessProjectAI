@@ -8,14 +8,11 @@ def get_list_model_parameters_LogisticRegression(n_method):
         input_size = 8 * 8 * 4
     elif n_method == 4: 
         input_size = 8 * 8 * 2
-       
-    model_parameters = []
-    
-    dic = {
-        'model_name': 'LogisticRegression', 
-        'input_size': input_size,
+           
+    model_parameters = {
+        'model_name': 'LogisticRegression',
+        'nb_hidden_layers': 0,
+        'size_layer_0': input_size
     }
-    
-    model_parameters.append(dic)
-    
+        
     return model_parameters
