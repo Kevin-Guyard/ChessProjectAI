@@ -8,10 +8,10 @@ class ModelTuner():
     
     def __init__(self):
         
-        self._n_chunk = 1
+        self._n_config = 1
         
         
-    def tuning(self, color_dataset, n_method, model_name, path_data='./data/', path_temp='./temp/', n_epochs=100, batch_size=100, nb_splits_CV=2, tolerance=1e-7, random_state=42, memory_map=True):
+    def tuning(self, color_dataset, n_method, model_name, path_data='./data/', path_temp='./temp/', nb_config=100, n_start_config=0, n_epochs=100, batch_size=100, nb_splits_CV=2, tolerance=1e-7, random_state=42, memory_map=True):
         
         if not os.path.exists(path_temp + 'tuning_data/'):
             os.mkdir(path_temp + 'tuning_data/')
@@ -20,17 +20,21 @@ class ModelTuner():
             os.mkdir(path_temp + 'backup/')
         
         if not os.path.exists(path_temp + 'backup/tuning_backup.json'):
-            n_chunk = 1
+            n_config = 1
         else:
             with open(path_temp + 'backup/tuning_backup.json', 'r') as file:
                 backup = json.load(file)
-                n_chunk = backup['n_chunk']
+                n_config = backup['n_config']
                 
-        parameters_tuning = get_parameters_tuning(n_method=n_method, model_name=model_name)
+        parameters_tuning = get_parameters_tuning(n_method=n_method, model_name=model_name, nb_config=nb_config, random_state=random_state)
         
-        while n_chunk != self._n_chunk:
+        while n_start_config != self._n_config:
             parameters_tuning.pop(0)
-            self._n_chunk += 1
+            self._n_config += 1
+        
+        while n_config != self._n_config:
+            parameters_tuning.pop(0)
+            self._n_config += 1
         
         for parameters in parameters_tuning:
             
@@ -39,11 +43,11 @@ class ModelTuner():
             dic_result = {'accuracy_test_CV': accuracy_test_CV}
             dic_result.update(parameters)
             df_result = pd.DataFrame(dic_result, index=[0])
-            df_result.to_csv(path_temp + 'tuning_data/df_result_' + str(self._n_chunk) + '.csv.gz', encoding='utf-8', compression='gzip', sep='\t', index=False)
+            df_result.to_csv(path_temp + 'tuning_data/df_result_' + str(self._n_config) + '.csv.gz', encoding='utf-8', compression='gzip', sep='\t', index=False)
             
-            self._n_chunk += 1
+            self._n_config += 1
             with open(path_temp + 'backup/tuning_backup.json', 'w') as file:
-                json.dump({'n_chunk': self._n_chunk}, file)
+                json.dump({'n_config': self._n_config}, file)
             
         files = os.listdir(path_temp + 'tuning_data/')
         
