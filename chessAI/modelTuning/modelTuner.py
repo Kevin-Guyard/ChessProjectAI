@@ -28,11 +28,11 @@ class ModelTuner():
                 
         parameters_tuning = get_parameters_tuning(n_method=n_method, model_name=model_name, nb_config=nb_config, random_state=random_state)
         
-        while n_start_config != self._n_config:
+        while n_start_config > self._n_config:
             parameters_tuning.pop(0)
             self._n_config += 1
         
-        while n_config != self._n_config:
+        while n_config > self._n_config:
             parameters_tuning.pop(0)
             self._n_config += 1
         
