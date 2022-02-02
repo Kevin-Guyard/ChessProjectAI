@@ -11,7 +11,7 @@ class ModelTuner():
         self._n_config = 1
         
         
-    def tuning(self, color_dataset, n_method, model_name, path_data='./data/', path_temp='./temp/', nb_config=100, n_start_config=0, n_epochs=100, batch_size=100, nb_splits_CV=2, tolerance=1e-7, random_state=42, memory_map=True):
+    def tuning(self, color_dataset, n_method, model_name, path_data='./data/', path_temp='./temp/', nb_config=100, n_start_config=1, n_epochs=100, batch_size=100, nb_splits_CV=2, tolerance=1e-7, random_state=42, memory_map=True):
         
         if not os.path.exists(path_temp + 'tuning_data/'):
             os.mkdir(path_temp + 'tuning_data/')
