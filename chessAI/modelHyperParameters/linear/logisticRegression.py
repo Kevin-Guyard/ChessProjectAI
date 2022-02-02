@@ -1,4 +1,4 @@
-def get_list_model_parameters_LogisticRegression(n_method):
+def get_model_parameters_LogisticRegression(n_method):
     
     if n_method == 1: 
         input_size = 8 * 8 * 12

@@ -22,11 +22,11 @@ def get_parameters_tuning(n_method, model_name, nb_configurations=100, random_st
 
 def get_model_parameters(model_name, n_method):
     
-    if model_name == 'LogisticRegression': model_parameters = get_list_model_parameters_LogisticRegression(n_method)
-    elif model_name == 'LinearNN1': model_parameters = get_list_model_parameters_LinearNN1(n_method)
-    elif model_name == 'LinearNN2': model_parameters = get_list_model_parameters_LinearNN2(n_method)
-    elif model_name == 'LinearNN3': model_parameters = get_list_model_parameters_LinearNN3(n_method)
-    elif model_name == 'LinearNN4': model_parameters = get_list_model_parameters_LinearNN4(n_method)
-    elif model_name == 'LinearNN5': model_parameters = get_list_model_parameters_LinearNN5(n_method)
+    if model_name == 'LogisticRegression': model_parameters = get_model_parameters_LogisticRegression(n_method)
+    elif model_name == 'LinearNN1': model_parameters = get_model_parameters_LinearNN1(n_method)
+    elif model_name == 'LinearNN2': model_parameters = get_model_parameters_LinearNN2(n_method)
+    elif model_name == 'LinearNN3': model_parameters = get_model_parameters_LinearNN3(n_method)
+    elif model_name == 'LinearNN4': model_parameters = get_model_parameters_LinearNN4(n_method)
+    elif model_name == 'LinearNN5': model_parameters = get_model_parameters_LinearNN5(n_method)
         
     return model_parameters
