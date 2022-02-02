@@ -104,7 +104,7 @@ def evaluate_model_accuracy_CV(color_dataset, n_method, parameters, path_data='.
                     y_train = y_train.to(device='cuda')
                     
                 optimizer.zero_grad()
-                outputs_training = torch.squeeze(model(X_train))
+                outputs_training = torch.squeeze(model(X_train), 1)
                 loss = criterion(outputs_training, y_train)
                             
                 loss.backward()
