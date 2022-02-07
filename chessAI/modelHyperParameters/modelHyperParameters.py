@@ -1,4 +1,4 @@
-from chessAI.modelHyperParameters.linear import get_model_parameters_LinearNN
+from chessAI.modelHyperParameters.linearNN import get_model_parameters_LinearNN
 from scipy.stats import loguniform
 import random
 import numpy as np
