@@ -29,14 +29,14 @@ def load_model(path_temp):
     return checkpoint
     
 
-def evaluate_model_accuracy_CV(color_dataset, n_method, parameters, path_data='./data/', path_temp='./temp/', n_epochs=100, batch_size=100, nb_splits_CV=2, tolerance=1e-7, random_state=42, memory_map=True):
+def evaluate_model_accuracy_CV(color_dataset, parameters, path_data='./data/', path_temp='./temp/', n_epochs=100, batch_size=100, nb_splits_CV=2, tolerance=1e-7, random_state=42, memory_map=True):
     
     torch.manual_seed(random_state)
     random.seed(random_state)
     np.random.seed(random_state)
     
     accuracies_test = []
-    dataset = ChessDatasetTuning(color_dataset=color_dataset, n_method=n_method, path_data=path_data, nb_splits_CV=nb_splits_CV, random_state=random_state, memory_map=memory_map)
+    dataset = ChessDatasetTuning(color_dataset=color_dataset, path_data=path_data, nb_splits_CV=nb_splits_CV, random_state=random_state, memory_map=memory_map)
     dataloader = DataLoader(dataset, batch_size=batch_size)
     
     n_split_CV = 0

@@ -11,7 +11,7 @@ class ModelTuner():
         self._n_config = 1
         
         
-    def tuning(self, color_dataset, n_method, model_name, path_data='./data/', path_temp='./temp/', nb_config=100, n_start_config=1, n_epochs=100, batch_size=100, nb_splits_CV=2, tolerance=1e-7, random_state=42, memory_map=True):
+    def tuning(self, color_dataset, model_name, path_data='./data/', path_temp='./temp/', nb_config=100, n_start_config=1, n_epochs=100, batch_size=100, nb_splits_CV=2, tolerance=1e-7, random_state=42, memory_map=True):
         
         if not os.path.exists(path_temp + 'tuning_data/'):
             os.mkdir(path_temp + 'tuning_data/')
@@ -26,7 +26,7 @@ class ModelTuner():
                 backup = json.load(file)
                 n_config = backup['n_config']
                 
-        parameters_tuning = get_parameters_tuning(n_method=n_method, model_name=model_name, nb_config=nb_config, random_state=random_state)
+        parameters_tuning = get_parameters_tuning(model_name=model_name, nb_config=nb_config, random_state=random_state)
         
         while n_start_config > self._n_config:
             parameters_tuning.pop(0)
@@ -38,7 +38,7 @@ class ModelTuner():
         
         for parameters in parameters_tuning:
             
-            accuracy_test_CV = evaluate_model_accuracy_CV(color_dataset=color_dataset, n_method=n_method, parameters=parameters, path_data=path_data, path_temp=path_temp, n_epochs=n_epochs, batch_size=batch_size, nb_splits_CV=nb_splits_CV, tolerance=tolerance, random_state=random_state, memory_map=memory_map)
+            accuracy_test_CV = evaluate_model_accuracy_CV(color_dataset=color_dataset, parameters=parameters, path_data=path_data, path_temp=path_temp, n_epochs=n_epochs, batch_size=batch_size, nb_splits_CV=nb_splits_CV, tolerance=tolerance, random_state=random_state, memory_map=memory_map)
             
             dic_result = {'accuracy_test_CV': accuracy_test_CV}
             dic_result.update(parameters)
