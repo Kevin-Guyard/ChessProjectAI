@@ -1,4 +1,5 @@
 import random
+from scipy.stats import loguniform
 
 NB_MAX_CHANNELS = 48
 SIZE_MAX_KERNEL_CONV = 7
@@ -12,6 +13,8 @@ SIZE_MIN_KERNEL_POOL = 1
 SIZE_MAX_KERNEL_POOL = 3
 PADDING_MIN_POOL = 0
 PADDING_MAX_POOL = 3
+SIZE_MIN_LINEAR_LAYER = 10
+SIZE_MAX_LINEAR_LAYER = 1000
 
 def get_model_parameters_CNN(model_name):
     
@@ -66,9 +69,17 @@ def get_model_parameters_CNN(model_name):
         dropout = random.random()
         batchnorm = bool(random.randint(0, 1))
         
-        model_parameters['dropout_' + str(n_conv_layer)] = dropout
-        model_parameters['batchnorm_' + str(n_conv_layer)] = batchnorm
+        model_parameters['dropout_conv_' + str(n_conv_layer)] = dropout
+        model_parameters['batchnorm_conv_' + str(n_conv_layer)] = batchnorm
         
-    model_parameters['linear'] = dim * dim * channels
+    model_parameters['size_linear_layer_0'] = dim * dim * channels
+    
+    for n_linear_layer in range(0, nb_linear_layers):
+        
+        model_parameters['size_linear_layer_' + str(n_linear_layer + 1)] = int(loguniform.rvs(SIZE_MIN_LINEAR_LAYER, SIZE_MAX_LINEAR_LAYER, size=1)[0])
+        model_parameters['activation_linear_' + str(n_linear_layer)] = 'LeakyReLU'
+        model_parameters['activation_slope_linear_' + str(n_linear_layer)] = 0.1
+        model_parameters['dropout_linear_' + str(n_linear_layer)] = random.random()
+        model_parameters['batchnorm_linear_' + str(n_linear_layer)] = bool(random.randint(0, 1))
             
     return model_parameters
