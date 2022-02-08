@@ -1,4 +1,5 @@
 from chessAI.modelHyperParameters.linearNN import get_model_parameters_LinearNN
+from chessAI.modelHyperParameters.cNN import get_model_parameters_CNN
 from scipy.stats import loguniform
 import random
 import numpy as np
@@ -24,5 +25,7 @@ def get_model_parameters(model_name):
     
     if 'LinearNN' in model_name:
         model_parameters = get_model_parameters_LinearNN(model_name=model_name)
+    if 'CNN' in model_name:
+        model_parameters = get_model_parameters_CNN(model_name=model_name)
         
     return model_parameters
