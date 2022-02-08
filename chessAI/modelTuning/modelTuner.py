@@ -45,6 +45,8 @@ class ModelTuner():
             df_result = pd.DataFrame(dic_result, index=[0])
             df_result.to_csv(path_temp + 'tuning_data/df_result_' + str(self._n_config) + '.csv.gz', encoding='utf-8', compression='gzip', sep='\t', index=False)
             
+            print('Model tuning: ' + str(self._n_config) + '/' + str(nb_config) + ' done')
+            
             self._n_config += 1
             with open(path_temp + 'backup/tuning_backup.json', 'w') as file:
                 json.dump({'n_config': self._n_config}, file)
