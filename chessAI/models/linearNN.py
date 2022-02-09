@@ -6,24 +6,32 @@ class LinearNN(torch.nn.Module):
         
         super(LinearNN, self).__init__()
         
-        layers = []
+        net = []
         
-        layers.append(torch.nn.Flatten())
+        net.append(torch.nn.Flatten())
+        
+        in_features = parameters['size_layer'].pop(0)
         
         for n_layer in range(0, parameters['nb_hidden_layers']):
-            layers.append(torch.nn.Linear(in_features=parameters['size_layer_' + str(n_layer)], out_features=parameters['size_layer_' + str(n_layer + 1)]))
-            if parameters['activation_' + str(n_layer)] == 'ReLU':
-                layers.append(torch.nn.ReLU())
-            elif parameters['activation_' + str(n_layer)] == 'LeakyReLU':
-                layers.append(torch.nn.LeakyReLU(negative_slope=parameters['activation_slope_' + str(n_layer)]))
-            layers.append(torch.nn.Dropout(parameters['dropout_' + str(n_layer)]))
-            if parameters['batchnorm_' + str(n_layer)] == True:
-                layers.append(torch.nn.BatchNorm1d(parameters['size_layer_' + str(n_layer + 1)]))
-                
-        layers.append(torch.nn.Linear(in_features=parameters['size_layer_' + str(parameters['nb_hidden_layers'])], out_features=1))
-        layers.append(torch.nn.Sigmoid())
+            
+            linear_layers = []
+            out_features = parameters['size_layer'].pop(0)
+            
+            linear_layers.append(torch.nn.Linear(in_features=in_features, out_features=out_features))
+            linear_layers.append(torch.nn.ReLU())
+            linear_layers.append(torch.nn.Dropout(parameters['dropout'].pop(0)))
+            if parameters['batchnorm'].pop(0) == True:
+                linear_layers.append(torch.nn.BatchNorm1d(out_features))
+            
+            linear = torch.nn.Sequential(*linear_layers)
+            net.append(linear)
+            in_features = out_features
+            
+        net.append(torch.nn.Linear(in_features=in_features, out_features=1))
+        net.append(torch.nn.Sigmoid())
         
-        self._net = torch.nn.Sequential(*layers)
+        self._net = torch.nn.Sequential(*net)
+        
         
     def forward(self, x):
         
