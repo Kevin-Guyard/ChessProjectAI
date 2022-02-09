@@ -163,4 +163,6 @@ def evaluate_model_accuracy_CV(color_dataset, parameters, path_data='./data/', p
     
     os.remove(path_temp + 'backup/model_backup.pth')
     
+    del dataset
+    
     return accuracy_test_CV
