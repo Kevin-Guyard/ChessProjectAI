@@ -28,9 +28,9 @@ class CNN(torch.nn.Module):
                                                    kernel_size=parameters['kernel_conv'].pop(0), \
                                                    stride=parameters['stride_conv'].pop(0), \
                                                    padding=parameters['padding_conv'].pop(0)))
-            conv_layers.append(torch.nn.Dropout(parameters['dropout_conv'].pop(0)))
             if parameters['batchnorm_conv'].pop(0) == True:
                 conv_layers.append(torch.nn.BatchNorm2d(num_features=out_channels))
+            conv_layers.append(torch.nn.Dropout(parameters['dropout_conv'].pop(0)))
             conv_layers.append(torch.nn.ReLU())
             if parameters['is_pool_max'].pop(0) == True:
                 conv_layers.append(torch.nn.MaxPool2d(kernel_size=parameters['kernel_pool'].pop(0), \
@@ -57,10 +57,10 @@ class CNN(torch.nn.Module):
             
             linear_layers.append(torch.nn.Linear(in_features=in_features, \
                                                  out_features=out_features))
-            linear_layers.append(torch.nn.ReLU())
-            linear_layers.append(torch.nn.Dropout(parameters['dropout_linear'].pop(0)))
             if parameters['batchnorm_linear'].pop(0) == True:
                 linear_layers.append(torch.nn.BatchNorm1d(out_features))
+            linear_layers.append(torch.nn.Dropout(parameters['dropout_linear'].pop(0)))
+            linear_layers.append(torch.nn.ReLU())
                 
             linear = torch.nn.Sequential(*linear_layers)
             net.append(linear)
