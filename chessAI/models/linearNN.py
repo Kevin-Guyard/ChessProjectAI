@@ -18,10 +18,10 @@ class LinearNN(torch.nn.Module):
             out_features = parameters['size_layer'].pop(0)
             
             linear_layers.append(torch.nn.Linear(in_features=in_features, out_features=out_features))
-            linear_layers.append(torch.nn.ReLU())
             linear_layers.append(torch.nn.Dropout(parameters['dropout'].pop(0)))
             if parameters['batchnorm'].pop(0) == True:
                 linear_layers.append(torch.nn.BatchNorm1d(out_features))
+            linear_layers.append(torch.nn.ReLU())
             
             linear = torch.nn.Sequential(*linear_layers)
             net.append(linear)
