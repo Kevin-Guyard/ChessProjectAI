@@ -125,9 +125,7 @@ def evaluate_model_accuracy_CV(color_dataset, parameters, path_data='./data/', p
             else:
                 save_model(model_state_dict=model.state_dict(), optimizer_state_dict=optimizer.state_dict(), losses_train=losses_train, \
                            accuracies_test=accuracies_test, epoch=epoch+1, n_split_CV=n_split_CV, is_training=True, path_temp=path_temp)
-                
-        print(epoch)
-                
+
         nb_correct_pred = 0
         nb_total_pred = 0
         dataset.set_mode('testing')

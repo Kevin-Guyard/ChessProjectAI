@@ -9,6 +9,8 @@ class ModelTuner():
     def __init__(self):
         
         self._n_config = 1
+        self._n_best = 0
+        self._best_accuracy_test = 0
         
         
     def tuning(self, color_dataset, model_name, path_data='./data/', path_temp='./temp/', nb_config=100, n_start_config=1, n_epochs=100, batch_size=100, nb_splits_CV=2, tolerance=1e-7, random_state=42, memory_map=True):
@@ -25,6 +27,9 @@ class ModelTuner():
             with open(path_temp + 'backup/tuning_backup.json', 'r') as file:
                 backup = json.load(file)
                 n_config = backup['n_config']
+                self._n_best = backup['n_best']
+                self._best_accuracy_test = backup['best_accuracy_test']
+                print('Actual best: number = ' + str(self._n_best) + ' / accuracy_test = ' + str(self._best_accuracy_test))
                 
         parameters_tuning = get_parameters_tuning(model_name=model_name, nb_config=nb_config, random_state=random_state)
         
@@ -38,7 +43,8 @@ class ModelTuner():
         
         for parameters in parameters_tuning:
             
-            accuracy_test_CV = evaluate_model_accuracy_CV(color_dataset=color_dataset, parameters=parameters, path_data=path_data, path_temp=path_temp, n_epochs=n_epochs, batch_size=batch_size, nb_splits_CV=nb_splits_CV, tolerance=tolerance, random_state=random_state, memory_map=memory_map)
+            accuracy_test_CV = evaluate_model_accuracy_CV(color_dataset=color_dataset, parameters=parameters, path_data=path_data, path_temp=path_temp, n_epochs=n_epochs, \
+                                                          batch_size=batch_size, nb_splits_CV=nb_splits_CV, tolerance=tolerance, random_state=random_state, memory_map=memory_map)
             
             dic_result = {'accuracy_test_CV': accuracy_test_CV}
             dic_result.update(parameters)
@@ -49,9 +55,14 @@ class ModelTuner():
             
             print('Model tuning: ' + str(self._n_config) + '/' + str(nb_config) + ' done')
             
+            if accuracy_test_CV > self._best_accuracy_test:
+                self._best_accuracy_test = accuracy_test_CV
+                self._n_best = self._n_config
+                print('new best model find: number = ' + str(self._n_best) + ' / accuracy_test = ' + str(self._best_accuracy_test))
+            
             self._n_config += 1
             with open(path_temp + 'backup/tuning_backup.json', 'w') as file:
-                json.dump({'n_config': self._n_config}, file)
+                json.dump({'n_config': self._n_config, 'n_best': self._n_best, 'best_accuracy_test': self._best_accuracy_test}, file)
             
         files = os.listdir(path_temp + 'tuning_data/')
         
