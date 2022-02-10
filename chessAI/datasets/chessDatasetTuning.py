@@ -49,13 +49,19 @@ class ChessDatasetTuning(Dataset):
     def read_data(self, color_dataset, path_data):
                 
         self._X = np.memmap(path_data + 'X_' + color_dataset + '_tuning.dat', dtype=bool, mode='r')
-        self._X = self._X.reshape((int(self._X.shape[0] / (12 * 8 * 8)), ) + (12, 8, 8))
+        self._X = self._X.reshape((int(self._X.shape[0] / (12 * 8 * 8)), 12, 8, 8))
         self._y = np.memmap(path_data + 'y_' + color_dataset + '_tuning.dat', dtype=bool, mode='r')
         
         if self._memory_map == False:
     
-            self._X = torch.Tensor(np.array(self._X))
-            self._y = torch.Tensor(np.array(self._y))
+            self._X = torch.Tensor(np.array(self._X)).float()
+            self._y = torch.Tensor(np.array(self._y)).float()
+            
+            mean = self._X.mean()
+            std = self._X.std()
+            
+            for channel in range(0, 12):
+                self._X[:, channel] = (self._X[:, channel] - mean) / std
             
             
     def init_kf_CV_iter(self):

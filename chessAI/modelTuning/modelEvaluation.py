@@ -97,7 +97,7 @@ def evaluate_model_accuracy_CV(color_dataset, parameters, path_data='./data/', p
                 except StopIteration:
                     break
                     
-                X_train, y_train = batch['X_train'].float(), batch['y_train'].float()
+                X_train, y_train = batch['X_train'], batch['y_train']
                 
                 if torch.cuda.is_available():
                     X_train = X_train.to(device='cuda')
@@ -140,7 +140,7 @@ def evaluate_model_accuracy_CV(color_dataset, parameters, path_data='./data/', p
             except StopIteration:
                 break
                 
-            X_test, y_test = batch['X_test'].float(), batch['y_test']
+            X_test, y_test = batch['X_test'], batch['y_test']
             
             if torch.cuda.is_available():
                 X_test = X_test.to(device='cuda')
