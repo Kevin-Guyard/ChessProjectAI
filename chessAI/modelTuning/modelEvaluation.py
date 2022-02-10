@@ -118,10 +118,16 @@ def evaluate_model_accuracy_CV(color_dataset, parameters, path_data='./data/', p
                 save_model(model_state_dict=model.state_dict(), optimizer_state_dict=optimizer.state_dict(), losses_train=losses_train, \
                            accuracies_test=accuracies_test, epoch=n_epochs, n_split_CV=n_split_CV, is_training=True, path_temp=path_temp)
                 break
+            elif epoch > 4 and losses_train[-1] > max(losses_train[-i] for i in range(2, 7)) * 1.2:
+                optimizer.param_groups[0]['lr'] = optimizer.param_groups[0]['lr'] / 2
+                save_model(model_state_dict=model.state_dict(), optimizer_state_dict=optimizer.state_dict(), losses_train=losses_train, \
+                           accuracies_test=accuracies_test, epoch=n_epochs, n_split_CV=n_split_CV, is_training=True, path_temp=path_temp)
             else:
                 save_model(model_state_dict=model.state_dict(), optimizer_state_dict=optimizer.state_dict(), losses_train=losses_train, \
                            accuracies_test=accuracies_test, epoch=epoch+1, n_split_CV=n_split_CV, is_training=True, path_temp=path_temp)
-            
+                
+        print(epoch)
+                
         nb_correct_pred = 0
         nb_total_pred = 0
         dataset.set_mode('testing')
